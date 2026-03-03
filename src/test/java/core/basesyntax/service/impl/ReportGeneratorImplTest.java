@@ -1,5 +1,6 @@
 package core.basesyntax.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import core.basesyntax.db.Storage;
@@ -18,9 +19,10 @@ class ReportGeneratorImplTest {
     }
 
     @Test
-    void generateReport_Ok() {
+    void getReport_generatesReport_ok() {
         String report = reportGenerator.getReport();
-
+        String expected = "fruit,quantity\r\nbanana,5\r\napple,10\r\n";
         assertNotNull(report);
+        assertEquals(expected, report);
     }
 }
