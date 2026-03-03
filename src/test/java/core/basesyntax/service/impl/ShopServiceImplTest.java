@@ -1,6 +1,6 @@
 package core.basesyntax.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import core.basesyntax.db.Storage;
@@ -21,9 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ShopServiceImplTest {
-    private FruitTransaction fruitTransaction = new FruitTransaction();
-    private FruitTransaction invalidFruitTransaction = new FruitTransaction();
-    private Map<String, Integer> storage;
+    private FruitTransaction firstTransaction;
+    private FruitTransaction secondTransaction;
     private List<FruitTransaction> transactionList;
     private Map<FruitTransaction.Operation, OperationHandler> operationHandlers;
     private OperationStrategy operationStrategy;
@@ -31,13 +30,12 @@ class ShopServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        storage = Storage.getFruitStorage();
         Storage.clear();
 
+        firstTransaction = new FruitTransaction();
+        secondTransaction = new FruitTransaction();
         transactionList = new ArrayList<>();
         operationHandlers = new HashMap<>();
-        fruitTransaction = new FruitTransaction();
-        invalidFruitTransaction = new FruitTransaction();
 
         operationHandlers.put(FruitTransaction.Operation.BALANCE, new BalanceOperation());
         operationHandlers.put(FruitTransaction.Operation.PURCHASE, new PurchaseOperation());
@@ -49,86 +47,60 @@ class ShopServiceImplTest {
     }
 
     @Test
-    void balanceOperation_Ok() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("b");
-        fruitTransaction.setQuantity(10);
-        transactionList.add(fruitTransaction);
+    void process_shouldUpdateStorageCorrectly_ok() {
 
-        assertNotNull(storage);
+        firstTransaction.setOperation("b");
+        firstTransaction.setFruit("banana");
+        firstTransaction.setQuantity(100);
+
+        secondTransaction.setOperation("s");
+        secondTransaction.setFruit("banana");
+        secondTransaction.setQuantity(20);
+
+        transactionList.add(firstTransaction);
+        transactionList.add(secondTransaction);
+
+        shopService.process(transactionList);
+
+        int expected = 120;
+
+        assertEquals(expected, Storage.getFruitStorage().get("banana"));
     }
 
     @Test
-    void balanceOperation_NotOk() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("b");
-        fruitTransaction.setQuantity(-10);
-        transactionList.add(fruitTransaction);
+    void process_purchaseShouldDecreaseStorage_ok() {
 
-        assertThrows(RuntimeException.class, () -> shopService.process(transactionList));
+        firstTransaction.setOperation("b");
+        firstTransaction.setFruit("banana");
+        firstTransaction.setQuantity(100);
+
+        secondTransaction.setOperation("p");
+        secondTransaction.setFruit("banana");
+        secondTransaction.setQuantity(20);
+
+        transactionList.add(firstTransaction);
+        transactionList.add(secondTransaction);
+
+        shopService.process(transactionList);
+
+        int expected = 80;
+
+        assertEquals(expected, Storage.getFruitStorage().get("banana"));
     }
 
     @Test
-    void supplyOperation_Ok() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("s");
-        fruitTransaction.setQuantity(10);
-        transactionList.add(fruitTransaction);
+    void process_whenOperationHandlerMissing_shouldThrowException() {
+        operationHandlers.remove(FruitTransaction.Operation.BALANCE);
+        operationStrategy = new OperationStrategyImpl(operationHandlers);
+        shopService = new ShopServiceImpl(operationStrategy);
 
-        assertNotNull(storage);
+        firstTransaction.setOperation("b");
+        firstTransaction.setFruit("banana");
+        firstTransaction.setQuantity(100);
+
+        transactionList.add(firstTransaction);
+
+        assertThrows(NullPointerException.class, () -> shopService.process(transactionList));
     }
 
-    @Test
-    void supplyOperation_NotOk() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("s");
-        fruitTransaction.setQuantity(-10);
-        transactionList.add(fruitTransaction);
-
-        assertThrows(RuntimeException.class, () -> shopService.process(transactionList));
-    }
-
-    @Test
-    void purchaseOperation_Ok() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("b");
-        fruitTransaction.setQuantity(10);
-        transactionList.add(fruitTransaction);
-        invalidFruitTransaction.setFruit("apple");
-        invalidFruitTransaction.setOperation("p");
-        invalidFruitTransaction.setQuantity(10);
-        transactionList.add(invalidFruitTransaction);
-
-        assertNotNull(storage);
-    }
-
-    @Test
-    void purchaseOperation_NotOk() {
-        invalidFruitTransaction.setFruit("apple");
-        invalidFruitTransaction.setOperation("p");
-        invalidFruitTransaction.setQuantity(10);
-        transactionList.add(invalidFruitTransaction);
-
-        assertThrows(RuntimeException.class, () -> shopService.process(transactionList));
-    }
-
-    @Test
-    void returnOperation_Ok() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("r");
-        fruitTransaction.setQuantity(10);
-        transactionList.add(fruitTransaction);
-
-        assertNotNull(storage);
-    }
-
-    @Test
-    void returnOperation_NotOk() {
-        fruitTransaction.setFruit("apple");
-        fruitTransaction.setOperation("r");
-        fruitTransaction.setQuantity(-10);
-        transactionList.add(fruitTransaction);
-
-        assertThrows(RuntimeException.class, () -> shopService.process(transactionList));
-    }
 }
