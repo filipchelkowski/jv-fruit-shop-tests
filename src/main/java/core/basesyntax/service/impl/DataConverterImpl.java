@@ -11,6 +11,10 @@ public class DataConverterImpl implements DataConverter {
 
     @Override
     public List<FruitTransaction> convertToTransactions(List<String> input) {
+        if (input == null || input.size() <= 1) {
+            throw new RuntimeException("Input data is empty");
+        }
+
         List<FruitTransaction> transactions = new ArrayList<>();
 
         for (int i = 1; i < input.size(); i++) {
