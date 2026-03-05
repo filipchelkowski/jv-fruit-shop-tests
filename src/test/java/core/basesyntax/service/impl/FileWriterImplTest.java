@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class FileWriterImplTest {
+    private static final String CORRECT_FILE_PATH = "inputFile.csv";
     private ReportGenerator reportGenerator = new ReportGeneratorImpl();
-    private String fileName = "testReport.csv";
     private FileWriter fileWriter = new FileWriterImpl();
 
     @BeforeEach
@@ -27,8 +27,8 @@ class FileWriterImplTest {
     }
 
     @Test
-    void writeFile_Ok(@TempDir Path tempDir) throws IOException {
-        Path filePath = tempDir.resolve(fileName);
+    void writeFile_validPath_writesFile_Ok(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve(CORRECT_FILE_PATH);
         String report = reportGenerator.getReport();
 
         fileWriter.write(report, filePath.toString());
@@ -38,10 +38,21 @@ class FileWriterImplTest {
     }
 
     @Test
-    void write_InvalidPath_ThrowsException(@TempDir Path tempDir) {
+    void write_InvalidPath_notOk(@TempDir Path tempDir) {
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> fileWriter.write("data", tempDir.toString()));
 
         assertTrue(exception.getMessage().contains("Can't write file"));
+    }
+
+    @Test
+    void write_fileExistsButReadOnly_notOk(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("readonly.txt");
+        Files.createFile(filePath);
+
+        filePath.toFile().setWritable(false);
+
+        assertThrows(RuntimeException.class,
+                () -> fileWriter.write("data", filePath.toString()));
     }
 }
