@@ -47,7 +47,7 @@ class ShopServiceImplTest {
     }
 
     @Test
-    void process_shouldUpdateStorageCorrectly_ok() {
+    void process_validBalanceAndSupply_updateStorage_ok() {
 
         firstTransaction.setOperation("b");
         firstTransaction.setFruit("banana");

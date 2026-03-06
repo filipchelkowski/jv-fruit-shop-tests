@@ -43,7 +43,7 @@ class FileReaderImplTest {
     }
 
     @Test
-    void read_invalidFile_unreadableTestFile_notOk() {
+    void read_unreadableFile_notOk() {
         assertThrows(RuntimeException.class, () -> fileReader.read(unreadableTestFile));
     }
 }

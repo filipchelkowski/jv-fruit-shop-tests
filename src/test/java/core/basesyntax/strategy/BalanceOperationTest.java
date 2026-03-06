@@ -34,7 +34,7 @@ class BalanceOperationTest {
     }
 
     @Test
-    void performOperation_invalidData_throwsExpection() {
+    void performOperation_invalidData_throwException() {
         fruitTransaction.setFruit("apple");
         fruitTransaction.setOperation("b");
         fruitTransaction.setQuantity(-10);

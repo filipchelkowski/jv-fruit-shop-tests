@@ -27,7 +27,7 @@ class FileWriterImplTest {
     }
 
     @Test
-    void writeFile_validPath_writesFile_Ok(@TempDir Path tempDir) throws IOException {
+    void writeFile_validPath_ok(@TempDir Path tempDir) throws IOException {
         Path filePath = tempDir.resolve(CORRECT_FILE_PATH);
         String report = reportGenerator.getReport();
 

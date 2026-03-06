@@ -34,7 +34,7 @@ class SupplyOperationTest {
     }
 
     @Test
-    void performOperation_invalidData_throwsExpection() {
+    void performOperation_invalidData_throwException() {
         fruitTransaction.setFruit("apple");
         fruitTransaction.setOperation("s");
         fruitTransaction.setQuantity(-10);
